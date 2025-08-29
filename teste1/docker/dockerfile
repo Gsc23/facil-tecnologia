@@ -1,0 +1,21 @@
+FROM php:8.1-cli-alpine
+
+RUN apk add --no-cache \
+        postgresql-dev \
+        libzip-dev \
+        unzip \
+        sqlite \
+        sqlite-dev \
+        bash \
+        autoconf \
+        gcc \
+        g++ \
+        make \
+    && docker-php-ext-install pdo_mysql pdo_sqlite
+
+WORKDIR /app
+COPY . .
+
+EXPOSE 8000
+
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "/app"]

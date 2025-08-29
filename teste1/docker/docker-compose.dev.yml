@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db
+      DB_DATABASE: database
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      - db
+    volumes:
+      - ../app:/app
+      - ../tests:/tests
+
+  db:
+    image: mysql:8.0
+    container_name: facil_teste_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: database
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../database/migration/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  tests:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    depends_on:
+      - app
+      - db
+    environment:
+      DB_HOST: db
+      DB_DATABASE: database
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    volumes:
+      - ../app:/app
+      - ../tests:/tests
+    command: >
+      sh -c "php ../tests/test.php"
+
+volumes:
+  db_data:
